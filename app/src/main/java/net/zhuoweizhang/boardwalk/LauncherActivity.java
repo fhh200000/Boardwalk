@@ -7,8 +7,10 @@ import java.util.List;
 
 import android.app.*;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.*;
+import android.support.v4.app.ActivityCompat;
 import android.view.*;
 import android.widget.*;
 
@@ -48,16 +50,40 @@ public class LauncherActivity extends Activity implements View.OnClickListener, 
 
 	public static final int REQUEST_BROWSE_FOR_CREDENTIALS = 1013; // date when this constant was added
 	public static final int REQUEST_BROWSE_FOR_RESOURCE_PACK = 1014;
-
+	private static final int REQUEST_EXTERNAL_STORAGE = 1;
+	private static String[] PERMISSIONS_STORAGE = {
+			"android.permission.READ_EXTERNAL_STORAGE",
+			"android.permission.WRITE_EXTERNAL_STORAGE" };
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			enableLaunchButton();
 		}
 	};
+	public static boolean verifyStoragePermissions(Activity activity) {
 
+		try {
+			//检测是否有写的权限
+			int permission = ActivityCompat.checkSelfPermission(activity,
+					"android.permission.WRITE_EXTERNAL_STORAGE");
+			if (permission != PackageManager.PERMISSION_GRANTED) {
+				// 没有写的权限，去申请写的权限，会弹出对话框
+				ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE,REQUEST_EXTERNAL_STORAGE);
+				//如果拒绝，则弹出Toast提示，并推出程序
+				if(ActivityCompat.checkSelfPermission(activity,
+						"android.permission.WRITE_EXTERNAL_STORAGE")!= PackageManager.PERMISSION_GRANTED)
+					return false;
+			}
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
+		if(verifyStoragePermissions(this))
+			Toast.makeText(LauncherActivity.this,R.string.permission_fail,Toast.LENGTH_LONG).show();
 		setContentView(R.layout.launcher_layout);
 		loginButton = (Button) findViewById(R.id.launcher_login_button);
 		usernameText = (TextView) findViewById(R.id.launcher_username_text);

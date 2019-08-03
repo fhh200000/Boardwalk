@@ -1,8 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    buildToolsVersion "27.0.3"
-    compileSdkVersion 23
+    compileSdkVersion 26
     defaultConfig {
         applicationId "net.zhuoweizhang.boardwalk.charm"
         minSdkVersion 26
